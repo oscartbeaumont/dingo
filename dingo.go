@@ -9,15 +9,18 @@
 
 package main
 
-import "fmt"
-import "os"
-import "net"
-import "flag"
-import "log"
-import "github.com/miekg/dns"
-import "time"
-import "github.com/patrickmn/go-cache"
-import "math/rand"
+import (
+			"fmt"
+			"os"
+			"net"
+			"flag"
+			"log"
+			"time"
+			"math/rand"
+
+			"github.com/miekg/dns"
+			"github.com/patrickmn/go-cache"
+	)
 
 /**********************************************************************/
 
@@ -28,6 +31,7 @@ var (
 	opt_h1      = flag.Bool("h1", false, "use HTTPS/1.1 transport")
 	opt_quic    = flag.Bool("quic", false, "use experimental QUIC transport")
 	opt_dbglvl  = flag.Int("dbg", 2, "debugging level")
+	opt_insecure = flag.Bool("insecure", false, "disable SSL Certificate check")
 )
 
 /**********************************************************************/

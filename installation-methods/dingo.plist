@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>Label</key>
+		<string>dingo</string>
+		<key>ProgramArguments</key>
+		<array>
+			<string>/usr/local/bin/dingo</string>
+			<string>-port</string><string>53</string>
+			<string>-gdns:server</string><string>216.58.199.78</string>
+			<string>-gdns:workers</string><string>20</string>
+			<string>-gdns:nopad</string>
+		</array>
+		<key>KeepAlive</key>
+		<true/>
+		<key>StandardOutPath</key>
+		<string>/usr/local/var/log/dingo.log</string>
+		<key>StandardErrorPath</key>
+		<string>/usr/local/var/log/dingo.err</string>
+	</dict>
+</plist>

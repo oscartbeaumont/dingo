@@ -8,11 +8,13 @@
 
 package main
 
-import "fmt"
-import "encoding/json"
-import "time"
-import "flag"
-import "github.com/miekg/dns"
+import (
+			"fmt"
+			"encoding/json"
+			"time"
+			"flag"
+			"github.com/miekg/dns"
+	)
 
 type OdnsReply struct {
 	ReturnCode string

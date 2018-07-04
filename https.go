@@ -8,13 +8,15 @@
 
 package main
 
-import "time"
-import "net/http"
-import "io/ioutil"
-import "crypto/tls"
-import "errors"
-import "golang.org/x/net/http2"
-import "github.com/lucas-clemente/quic-go/h2quic"
+import (
+			"time"
+			"net/http"
+			"io/ioutil"
+			"crypto/tls"
+			"errors"
+			"golang.org/x/net/http2"
+			"github.com/lucas-clemente/quic-go/h2quic"
+	)
 
 type Https struct {
 	client     http.Client
@@ -26,6 +28,7 @@ func NewHttps(sni string, forceh1 bool) *Https {
 	/* TLS setup */
 	tlscfg := new(tls.Config)
 	tlscfg.ServerName = sni
+	tlscfg.InsecureSkipVerify = *opt_insecure
 
 	/* HTTP transport */
 	var tr http.RoundTripper

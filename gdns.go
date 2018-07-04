@@ -8,18 +8,20 @@
 
 package main
 
-import "fmt"
-import "net/url"
-import "time"
-import "encoding/json"
-import "math/rand"
-import "strings"
-import "flag"
+import (
+			"fmt"
+			"net/url"
+			"time"
+			"encoding/json"
+			"math/rand"
+			"flag"
+	)
 
 type Gdns struct {
 	workers *int
 	server *string
 	auto *bool
+	auto6 *bool
 	sni *string
 	host *string
 	edns *string
@@ -28,12 +30,14 @@ type Gdns struct {
 
 /* command-line arguments */
 func (r *Gdns) Init() {
-	r.workers = flag.Int("gdns:workers", 10,
+	r.workers = flag.Int("gdns:workers", 0,
 		"Google DNS: number of independent workers")
 	r.server  = flag.String("gdns:server", "216.58.195.78",
 		"Google DNS: server address")
 	r.auto   = flag.Bool("gdns:auto", false,
 		"Google DNS: try to lookup the closest IPv4 server")
+	r.auto6   = flag.Bool("gdns:auto6", false,
+  	"Google DNS: try to lookup the closest IPv6 server")
 	r.sni     = flag.String("gdns:sni", "www.google.com",
 		"Google DNS: SNI string to send (should match server certificate)")
 	r.host    = flag.String("gdns:host", "dns.google.com",
@@ -49,17 +53,37 @@ func (r *Gdns) Init() {
 func (R *Gdns) Start() {
 	if *R.workers <= 0 { return }
 
-	if *R.auto {
+	if *R.auto6 {
 		dbg(1, "resolving dns.google.com...")
-		r4 := R.resolve(NewHttps(*R.sni, false), *R.server, "dns.google.com", 1)
-		if r4.Status == 0 && len(r4.Answer) > 0 {
-			R.server = &r4.Answer[0].Data
+		r6 := R.resolve(NewHttps(*R.sni, false), *R.server, "dns.google.com", 28)
+		if r6.Status == 0 && len(r6.Answer) > 0 {
+			R.server = &r6.Answer[0].Data
+		}
+	} else {
+		if *R.auto {
+			dbg(1, "resolving dns.google.com...")
+			r4 := R.resolve(NewHttps(*R.sni, false), *R.server, "dns.google.com", 1)
+			if r4.Status == 0 && len(r4.Answer) > 0 {
+				R.server = &r4.Answer[0].Data
+			}
 		}
 	}
 
 	dbg(1, "starting %d Google Public DNS client(s) querying server %s",
 		*R.workers, *R.server)
 	for i := 0; i < *R.workers; i++ { go R.worker(*R.server) }
+}
+
+// To prevent misinterpretation of the URL, restrict the padding characters to the unreserved URL characters:
+// upper- and lower-case letters, digits, hyphen, period, underscore and tilde. http://stackoverflow.com/a/695469/18829
+const padChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~"
+
+func getPaddedStr(n int) string {
+    s := make([]byte, n)
+    for i := range s {
+        s[i] = padChars[rand.Intn(len(padChars))]
+    }
+    return string(s)
 }
 
 func (R *Gdns) worker(server string) {
@@ -80,7 +104,9 @@ func (R *Gdns) resolve(https *Https, server string, qname string, qtype int) *Re
 		v.Set("edns_client_subnet", *R.edns)
 	}
 	if !*R.nopad {
-		v.Set("random_padding", strings.Repeat(string(65+rand.Intn(26)), rand.Intn(500)))
+		// maximum dnslength+type.length (longest possible Type 5 digits)
+		// minus current to make always equal query lenght url
+		v.Set("random_padding", getPaddedStr(259-len(qname)-len(fmt.Sprintf("%d", qtype))))
 	}
 
 	/* query */
