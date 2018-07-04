@@ -8,7 +8,12 @@ It effectively encrypts all your DNS traffic. It also supports
 The ultimate goal for the project is to provide a secure, caching DNS client that
 communicates with recursive DNS resolvers over encrypted channels only. For now,
 it resolves DNS queries over HTTP/2 in independent threads. The plans for
-future include better caching and support for QUIC.
+future include better caching and support for QUIC. Below is A Command That 
+Can Be Used For Testing The DNS Server.
+
+```
+dig @localhost -p 32000 google.com.au
+```
 
 ## Quick start
 
