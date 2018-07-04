@@ -112,8 +112,8 @@ func handle(buf []byte, addr *net.UDPAddr, uc *net.UDPConn) {
 		r = resolve(qname, int(qtype))
 		dbg(8, "got reply: %+v", r)
 
-		/* put to cache for 10 seconds (FIXME: use minimum TTL) */
-		rcache.Set(cid, r, 10*time.Second)
+		/* put to cache for TTL seconds (FIXME: The TTL Times Where Always Changing And Where Low In Testing)*/
+		rcache.Set(cid, r, r.Answer[0].TTL*time.Second)
 	}
 
 	/* rewrite the answers in r into rmsg */
