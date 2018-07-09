@@ -9,17 +9,17 @@
 package main
 
 import (
-			"time"
-			"net/http"
-			"io/ioutil"
-			"crypto/tls"
-			"errors"
-			"golang.org/x/net/http2"
-			"github.com/lucas-clemente/quic-go/h2quic"
-	)
+	"crypto/tls"
+	"errors"
+	"github.com/lucas-clemente/quic-go/h2quic"
+	"golang.org/x/net/http2"
+	"io/ioutil"
+	"net/http"
+	"time"
+)
 
 type Https struct {
-	client     http.Client
+	client http.Client
 }
 
 func NewHttps(sni string, forceh1 bool) *Https {
@@ -40,7 +40,7 @@ func NewHttps(sni string, forceh1 bool) *Https {
 
 	case *opt_quic:
 		quic := new(h2quic.RoundTripper)
-//		quic.TLSClientConfig = tlscfg // FIXME
+		//		quic.TLSClientConfig = tlscfg // FIXME
 		tr = quic
 
 	default:

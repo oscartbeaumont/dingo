@@ -9,21 +9,21 @@
 package main
 
 import (
-			"fmt"
-			"encoding/json"
-			"time"
-			"flag"
-			"github.com/miekg/dns"
-	)
+	"encoding/json"
+	"flag"
+	"fmt"
+	"github.com/miekg/dns"
+	"time"
+)
 
 type OdnsReply struct {
-	ReturnCode string
-	ID     int
-	AA     bool
-	AD     bool
-	RA     bool
-	RD     bool
-	TC     bool
+	ReturnCode        string
+	ID                int
+	AA                bool
+	AD                bool
+	RA                bool
+	RD                bool
+	TC                bool
 	QuestionSection   map[string]interface{}
 	AnswerSection     []map[string]interface{}
 	AdditionalSection []map[string]interface{}
@@ -34,9 +34,9 @@ type OdnsReply struct {
 
 type Odns struct {
 	workers *int
-	server *string
-	sni *string
-	host *string
+	server  *string
+	sni     *string
+	host    *string
 
 	string2rcode map[string]int
 	string2rtype map[string]uint16
@@ -53,23 +53,27 @@ func (R *Odns) Init() {
 		"OpenDNS: HTTP 'Host' header (real FQDN, encrypted in TLS)")
 
 	R.string2rcode = make(map[string]int)
-	for rcode,str := range dns.RcodeToString {
+	for rcode, str := range dns.RcodeToString {
 		R.string2rcode[str] = rcode
 	}
 
 	R.string2rtype = make(map[string]uint16)
-	for rtype,str := range dns.TypeToString {
+	for rtype, str := range dns.TypeToString {
 		R.string2rtype[str] = rtype
 	}
 }
 
 /* start OpenDNS workers */
 func (R *Odns) Start() {
-	if *R.workers <= 0 { return }
+	if *R.workers <= 0 {
+		return
+	}
 
 	dbg(1, "starting %d OpenDNS client(s) querying server %s",
 		*R.workers, *R.server)
-	for i := 0; i < *R.workers; i++ { go R.worker(*R.server) }
+	for i := 0; i < *R.workers; i++ {
+		go R.worker(*R.server)
+	}
 }
 
 /* handler of new requests */
@@ -82,14 +86,16 @@ func (R *Odns) worker(server string) {
 
 /* resolve single request */
 func (R *Odns) resolve(https *Https, server string, qname string, qtype int) *Reply {
-	r := Reply{ Status: -1 }
+	r := Reply{Status: -1}
 
 	/* prepare */
 	uri := fmt.Sprintf("/%s/%s", dns.Type(qtype).String(), qname)
 
 	/* query */
 	buf, err := https.Get(server, *R.host, uri)
-	if err != nil { return &r }
+	if err != nil {
+		return &r
+	}
 	r.Now = time.Now()
 
 	/* parse */
@@ -104,34 +110,42 @@ func (R *Odns) resolve(https *Https, server string, qname string, qtype int) *Re
 	r.AD = f.AD
 	r.CD = false
 
-	for _,v := range f.AnswerSection {
+	for _, v := range f.AnswerSection {
 		rr := R.odns2grr(v)
-		if rr != nil { r.Answer = append(r.Answer, *rr) }
+		if rr != nil {
+			r.Answer = append(r.Answer, *rr)
+		}
 	}
 
-	for _,v := range f.AdditionalSection {
+	for _, v := range f.AdditionalSection {
 		rr := R.odns2grr(v)
-		if rr != nil { r.Additional = append(r.Additional, *rr) }
+		if rr != nil {
+			r.Additional = append(r.Additional, *rr)
+		}
 	}
 
-	for _,v := range f.AuthoritySection {
+	for _, v := range f.AuthoritySection {
 		rr := R.odns2grr(v)
-		if rr != nil { r.Authority = append(r.Authority, *rr) }
+		if rr != nil {
+			r.Authority = append(r.Authority, *rr)
+		}
 	}
 
 	return &r
 }
 
-func (R *Odns) odns2grr(v map[string]interface{}) (*GRR) {
+func (R *Odns) odns2grr(v map[string]interface{}) *GRR {
 	/* catch panics */
 	defer func() {
-		if r := recover(); r != nil { dbg(1, "panic in odns2grr()") }
+		if r := recover(); r != nil {
+			dbg(1, "panic in odns2grr()")
+		}
 	}()
 
 	/* get basic data */
-	rname  := v["Name"].(string)
+	rname := v["Name"].(string)
 	rtypes := v["Type"].(string)
-	rttl   := uint32(v["TTL"].(float64))
+	rttl := uint32(v["TTL"].(float64))
 
 	/* parse type & data */
 	var rdata string
@@ -148,7 +162,7 @@ func (R *Odns) odns2grr(v map[string]interface{}) (*GRR) {
 		rdata = v["Target"].(string)
 	case "MX":
 		rtype = dns.TypeMX
-		mx   := v["MailExchanger"].(string)
+		mx := v["MailExchanger"].(string)
 		pref := v["Preference"].(float64)
 		rdata = fmt.Sprintf("%d %s", int(pref), mx)
 	case "NS":
@@ -169,12 +183,12 @@ func (R *Odns) odns2grr(v map[string]interface{}) (*GRR) {
 		rdata = v["Target"].(string)
 	case "SOA":
 		rtype = dns.TypeSOA
-		msn  := v["MasterServerName"].(string)
-		mn   := v["MaintainerName"].(string)
-		ser  := v["Serial"].(float64)
-		ref  := v["Refresh"].(float64)
-		ret  := v["Retry"].(float64)
-		exp  := v["Expire"].(float64)
+		msn := v["MasterServerName"].(string)
+		mn := v["MaintainerName"].(string)
+		ser := v["Serial"].(float64)
+		ref := v["Refresh"].(float64)
+		ret := v["Retry"].(float64)
+		exp := v["Expire"].(float64)
 		nttl := v["NegativeTtl"].(float64)
 		rdata = fmt.Sprintf("%s %s %d %d %d %d %d",
 			msn, mn, int(ser), int(ref), int(ret), int(exp), int(nttl))
