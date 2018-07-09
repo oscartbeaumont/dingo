@@ -1,3 +1,4 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/oscartbeaumont/dingo)](https://goreportcard.com/report/github.com/oscartbeaumont/dingo)
 # dingo
 A DNS client (stub resolver) implemented in Go for the [Google
 DNS-over-HTTPS](https://developers.google.com/speed/public-dns/docs/dns-over-https).
