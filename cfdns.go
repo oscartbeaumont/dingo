@@ -100,7 +100,7 @@ func (R *Cfdns) resolve(https *Https, server string, qname string, qtype int) *R
 	}
 	if !*R.nopad {
 		// maximum dnslength+type.length (longest possible Type 5 digits)
-		// minus current to make always equal query lenght url
+		// minus current to make always equal query length url
 		v.Set("random_padding", getPaddedStr(259-len(qname)-len(fmt.Sprintf("%d", qtype))))
 	}
 
