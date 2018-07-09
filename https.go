@@ -28,17 +28,17 @@ func NewHttps(sni string, forceh1 bool) *Https {
 	/* TLS setup */
 	tlscfg := new(tls.Config)
 	tlscfg.ServerName = sni
-	tlscfg.InsecureSkipVerify = *opt_insecure
+	tlscfg.InsecureSkipVerify = *optInsecure
 
 	/* HTTP transport */
 	var tr http.RoundTripper
 	switch {
-	case forceh1 || *opt_h1:
+	case forceh1 || *optH1:
 		h1 := new(http.Transport)
 		h1.TLSClientConfig = tlscfg
 		tr = h1
 
-	case *opt_quic:
+	case *optQuic:
 		quic := new(h2quic.RoundTripper)
 		//		quic.TLSClientConfig = tlscfg // FIXME
 		tr = quic
