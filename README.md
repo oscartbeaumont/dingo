@@ -19,7 +19,7 @@ dig @localhost -p 32000 google.com.au
 ## Quick start
 
 Download a pre-built binary for your platform from [the latest
-release](https://github.com/pforemski/dingo/releases/latest) (or build your own binaries).
+release](https://github.com/oscartbeaumont/dingo/releases/latest) (or build your own binaries).
 
 Run dingo as root on port 53. For example, on Linux:
 ```
@@ -95,6 +95,7 @@ screen -dmS dingo /path/to/bin/dingo -port=53 -gdns:server=[2a00:1450:401b:800::
 ## Author
 
 Pawel Foremski, [pjf@foremski.pl](mailto:pjf@foremski.pl)
+Maintained/Updated By Oscar Beaumont
 
 Find me on: [LinkedIn](https://www.linkedin.com/in/pforemski),
 [Twitter](https://twitter.com/pforemski)
